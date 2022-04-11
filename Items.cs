@@ -10,7 +10,30 @@ namespace VirtualPets2
     public enum Food
     {
 
-        CHEAP_FISH = 10
+        Cheap_Fish = 1,
+        Fancy_Fish = 3,
+
+    }
+
+    static class FoodMethods
+    {
+        
+        public static string GetDisplayName(this Food food)
+        {
+
+            string name = "";
+
+            foreach (char letter in Enum.GetName(typeof (Food), food))
+            {
+
+                if (letter == '_') name += " ";
+                else name += letter;
+
+            }
+
+            return name;
+
+        }
 
     }
 

@@ -15,21 +15,23 @@ namespace VirtualPets2
 
         static List<Pet> pets = new List<Pet>();
 
+        static int eggs = 0;
+
+        static int playerLevel = 1;
+
         static void Main(string[] args)
         {
 
             LoadData();
 
-            //<debug>
-
-            //inventory.AddFood(Food.CHEAP_FISH);
-
-            //<\debug>
-
             bool play = true;
 
             while (play)
             {
+
+                playerLevel = (pets.Count <= 5) ? pets.Count : 5;
+
+                playerLevel = 5;
 
                 foreach (Pet pet in pets)
                 {
@@ -38,7 +40,7 @@ namespace VirtualPets2
 
                 }
 
-                int choice = Menu.DisplayMenu("Select a choice", new List<string>() {"Exit", "Collect items", "Raise Pet", "Tend to pets", "See Pets"});
+                int choice = Menu.DisplayMenu("Select a choice", new List<string>() {"Exit", "Collect items", "View food sack", "Raise Pet", "Tend to pets", "See Pets"});
 
                 switch (choice)
                 {
@@ -51,13 +53,58 @@ namespace VirtualPets2
 
                     case 1:
                         //play game
+
+                        Game game = new Game(playerLevel, inventory);
+
+                        eggs += game.Play() ? 1 : 0;
+
                         break;
 
                     case 2:
-                        //get new pet
+                        //view food sack
+
+                        Console.Clear();
+
+                        foreach (Food food in inventory.GetFoodSack().Keys)
+                        {
+
+                            if (!inventory.HasFood(food)) continue;
+
+                            Console.WriteLine(food.GetDisplayName() + ": " + inventory.GetFoodSack()[food]);
+
+                        }
+
+                        Console.ReadKey();
+
                         break;
 
                     case 3:
+                        //get new pet
+
+                        Console.Clear();
+
+                        if (eggs == 0)
+                        {
+
+                            Console.WriteLine("You have no eggs! Go and forage for items to get started");
+
+                            Console.ReadKey();
+
+                            break;
+
+                        }
+
+                        pets.Add(new Pet(playerLevel));
+
+                        Console.WriteLine("You hatched a new pet!");
+
+                        pets[pets.Count - 1].DisplayPetInfo();
+
+                        Console.ReadKey();
+
+                        break;
+
+                    case 4:
                         //tend to pets
 
                         Console.Clear();
@@ -82,15 +129,22 @@ namespace VirtualPets2
 
                         }
 
-                        
-
                         int pick = Menu.DisplayMenu("Which pet do you want to tend to?", names);
+
+                        if (pets[pick].hunger == 0)
+                        {
+
+                            Console.WriteLine("Do you want to send of " + pets[pick].name + "? (Y/N)");
+
+                            if (Console.ReadLine() == "Y") pets.RemoveAt(pick);
+
+                        }
 
                         pets[pick].Feed(inventory);
 
                         break;
 
-                    case 4:
+                    case 5:
                         //display pets
 
                         Console.Clear();
@@ -141,17 +195,28 @@ namespace VirtualPets2
                         for (int i = 0; i < inventory.GetFoodSack().Keys.Count; i++)
                         {
 
-                            Food food = (Food)Enum.Parse(typeof(Food), reader.ReadString());
-
-                            int amount = reader.ReadInt32();
-
-                            for (int j = 0; j < amount; j++)
+                            try
                             {
 
-                                inventory.AddFood(food);
+                                Food food = (Food)Enum.Parse(typeof(Food), reader.ReadString());
+
+                                int amount = reader.ReadInt32();
+
+                                for (int j = 0; j < amount; j++)
+                                {
+
+                                    inventory.AddFood(food);
+
+                                }
 
                             }
+                            catch (EndOfStreamException)
+                            {
 
+                                break;
+
+                            }
+                            
                         }
 
                     }
@@ -257,6 +322,33 @@ namespace VirtualPets2
                 }
 
             }
+
+            //clean pointless files
+
+            foreach (string directory in Directory.GetFiles(Directory.GetCurrentDirectory() + "/gamedata/pets"))
+            {
+
+                if (!IsActivePet(directory.Substring(directory.Length - 36).Remove(directory.Substring(directory.Length - 36).Length - 4)))
+                {
+
+                    File.Delete(directory);
+
+                }
+
+            }
+
+        }
+
+        private static bool IsActivePet(string uuid)
+        {
+
+            foreach (Pet pet in pets)
+            {
+
+                if (pet.uuid == uuid) return true;
+
+            }
+            return false;
 
         }
 

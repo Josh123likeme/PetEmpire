@@ -111,7 +111,7 @@ namespace VirtualPets2
 
                 if (!inventory.HasFood(food)) continue;
 
-                choices.Add(food.GetType().Name + ": " + inventory.GetFoodSack()[food]);
+                choices.Add(food.GetDisplayName() + ": " + inventory.GetFoodSack()[food]);
 
             }
 
@@ -120,6 +120,8 @@ namespace VirtualPets2
             if (choice == 0) return;
 
             inventory.RemoveFood(inventory.GetFoodSack().Keys.ToList()[0]);
+
+            hunger += (int) inventory.GetFoodSack().Keys.ToList()[0];
 
             UpdateStats();
 
@@ -159,6 +161,7 @@ namespace VirtualPets2
                 }
 
                 hunger = (hunger < 0) ? 0 : hunger;
+                hunger = (hunger > maxHunger) ? maxHunger : hunger;
 
             }
 
