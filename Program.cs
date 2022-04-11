@@ -31,8 +31,6 @@ namespace VirtualPets2
 
                 playerLevel = (pets.Count <= 5) ? pets.Count : 5;
 
-                playerLevel = 5;
-
                 foreach (Pet pet in pets)
                 {
 
