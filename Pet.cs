@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using UIElements;
     
 namespace VirtualPets2
@@ -34,7 +34,6 @@ namespace VirtualPets2
             this.level = level;
 
             name = GenerateName();
-
             uuid = GenerateUUID();
 
             maxHunger = random.Next(level * 10, level * 20);
@@ -119,9 +118,9 @@ namespace VirtualPets2
 
             if (choice == 0) return;
 
-            inventory.RemoveFood(inventory.GetFoodSack().Keys.ToList()[0]);
+            inventory.RemoveFood(inventory.GetFoodSack().Keys.ToList()[choice - 1]);
 
-            hunger += (int) inventory.GetFoodSack().Keys.ToList()[0];
+            hunger += (int) inventory.GetFoodSack().Keys.ToList()[choice - 1];
 
             UpdateStats();
 
@@ -148,22 +147,19 @@ namespace VirtualPets2
         public void UpdateStats()
         {
 
-            if (lastPing + metabolicRate > DateTime.UtcNow.Ticks)
+            Console.WriteLine(lastPing + "\n" + DateTime.UtcNow.Ticks);
+
+            for (long timeLeft = DateTime.UtcNow.Ticks - lastPing; timeLeft  - metabolicRate > 0; timeLeft -= metabolicRate)
             {
 
-                for (long timeLeft = DateTime.UtcNow.Ticks - lastPing; timeLeft > 0; timeLeft -= metabolicRate)
-                {
+                lastPing += metabolicRate;
 
-                    lastPing += metabolicRate;
-
-                    hunger -= 1;
-
-                }
-
-                hunger = (hunger < 0) ? 0 : hunger;
-                hunger = (hunger > maxHunger) ? maxHunger : hunger;
+                hunger -= 1;
 
             }
+
+            hunger = (hunger < 0) ? 0 : hunger;
+            hunger = (hunger > maxHunger) ? maxHunger : hunger;
 
         }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 using UIElements;
 
@@ -29,7 +29,9 @@ namespace VirtualPets2
             while (play)
             {
 
-                playerLevel = (pets.Count <= 5) ? pets.Count : 5;
+                playerLevel = (int) Math.Floor(0.5 * Math.Sqrt(pets.Count) + 1);
+
+                if (playerLevel > 5) playerLevel = 5;
 
                 foreach (Pet pet in pets)
                 {
@@ -132,13 +134,17 @@ namespace VirtualPets2
                         if (pets[pick].hunger == 0)
                         {
 
-                            Console.WriteLine("Do you want to send of " + pets[pick].name + "? (Y/N)");
+                            Console.WriteLine("Do you want to send off " + pets[pick].name + "? (Y/N)");
 
                             if (Console.ReadLine() == "Y") pets.RemoveAt(pick);
 
                         }
+                        else
+                        {
 
-                        pets[pick].Feed(inventory);
+                            pets[pick].Feed(inventory);
+
+                        }    
 
                         break;
 
@@ -231,7 +237,7 @@ namespace VirtualPets2
 
                             Pet pet = new Pet();
 
-                            string uuid = directory.Remove(0, (Directory.GetCurrentDirectory() + "/gamedata/pets").Length);
+                            string uuid = directory.Remove(0, (Directory.GetCurrentDirectory() + "/gamedata/pets/").Length);
                             uuid = uuid.Remove(uuid.Length - 4);
                             pet.uuid = uuid;
                             pet.name = reader.ReadString();
@@ -322,7 +328,7 @@ namespace VirtualPets2
             }
 
             //clean pointless files
-
+            
             foreach (string directory in Directory.GetFiles(Directory.GetCurrentDirectory() + "/gamedata/pets"))
             {
 
@@ -334,7 +340,7 @@ namespace VirtualPets2
                 }
 
             }
-
+            
         }
 
         private static bool IsActivePet(string uuid)
@@ -343,7 +349,12 @@ namespace VirtualPets2
             foreach (Pet pet in pets)
             {
 
-                if (pet.uuid == uuid) return true;
+                if (pet.uuid.Equals(uuid))
+                {
+
+                    return true;
+
+                }
 
             }
             return false;
